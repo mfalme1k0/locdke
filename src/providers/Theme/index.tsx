@@ -6,6 +6,7 @@ import type { Theme, ThemeContextType } from './types'
 
 import canUseDOM from '@/utilities/canUseDOM'
 import { defaultTheme, getImplicitPreference, themeLocalStorageKey } from './shared'
+import { themePreferenceChangeEvent } from './ThemeSelector/types'
 import { themeIsValid } from './types'
 
 const initialContext: ThemeContextType = {
@@ -31,6 +32,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       window.localStorage.setItem(themeLocalStorageKey, themeToSet)
       document.documentElement.setAttribute('data-theme', themeToSet)
     }
+    window.dispatchEvent(new Event(themePreferenceChangeEvent))
   }, [])
 
   useEffect(() => {
@@ -48,7 +50,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     document.documentElement.setAttribute('data-theme', themeToSet)
-    setThemeState(themeToSet)
   }, [])
 
   return <ThemeContext value={{ setTheme, theme }}>{children}</ThemeContext>

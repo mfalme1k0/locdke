@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { isAdminOrSuperadmin, isSuperadmin } from '../access/roles'
+import { enforceBookingRateLimit } from '@/lib/bookingRateLimit'
 
 export const Bookings: CollectionConfig = {
   slug: 'bookings',
@@ -19,10 +20,11 @@ export const Bookings: CollectionConfig = {
   },
   hooks: {
     beforeValidate: [
-      ({ data, operation, req }) => {
+      async ({ data, operation, req }) => {
         // Honeypot: real people never see this field, bots fill it in.
-        if (operation === 'create' && !req.user && data?.website) {
-          throw new Error('Invalid submission')
+        if (operation === 'create' && !req.user) {
+          if (data?.website) throw new Error('Invalid submission')
+          await enforceBookingRateLimit(req.headers)
         }
         return data
       },

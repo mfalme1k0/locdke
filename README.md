@@ -39,3 +39,4 @@ The **first account created at /admin becomes the superadmin** (set its role to 
 2. **File storage (required)**: Netlify/Vercel disks are wiped each deploy. Create an S3-compatible bucket (Cloudflare R2 recommended) and set the `S3_*` vars in `.env.example`.
 3. **Migrations**: run `npm run payload migrate:create` once locally, commit `src/migrations`, and run `npm run payload migrate` on deploy (dev mode auto-pushes schema; production should not).
 4. Set `PAYLOAD_SECRET`, `NEXT_PUBLIC_SERVER_URL`, `PREVIEW_SECRET`, `CRON_SECRET`.
+5. Configure `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` for public booking rate limits (5 submissions per IP per 15 minutes).

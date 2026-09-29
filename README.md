@@ -11,7 +11,6 @@ One-page site + CMS for Brighton Serem (luxury locs). Next.js 16 + Payload 3 + P
 | Homepage text, About, Site Settings | edit | edit |
 | Delete media | ❌ | ✅ |
 | Users & roles | own profile only | full |
-| Pages, Posts, Header/Footer, Forms, Redirects, Search | hidden | full |
 
 Roles live in `src/access/roles.ts`. Only a superadmin can change a `role` field, so an admin cannot promote themselves.
 Every content save calls `revalidatePath('/')` (`src/hooks/revalidateHome.ts`) so edits appear on the site immediately.
@@ -22,7 +21,7 @@ Every content save calls `revalidatePath('/')` (`src/hooks/revalidateHome.ts`) s
 - `src/globals/`: Homepage (section text), ArtistProfile, SiteSettings
 - `src/site/`: the one-page frontend (`site.css` holds all colours/fonts as tokens)
 - `src/app/(frontend)/page.tsx`: the homepage
-- `src/app/(frontend)/(cms)/`: the template's generic pages/posts/search routes (superadmin only, currently unused)
+- The frontend is intentionally a single CMS-managed homepage; bookings use a dedicated public form.
 
 ## Setup
 

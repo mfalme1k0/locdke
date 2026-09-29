@@ -12,11 +12,8 @@ import { Users } from './collections/Users'
 import { ArtistProfile } from './globals/ArtistProfile'
 import { Homepage } from './globals/Homepage'
 import { SiteSettings } from './globals/SiteSettings'
-import { Footer } from './Footer/config'
-import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
-import { getServerSideURL } from './utilities/getURL'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

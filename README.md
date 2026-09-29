@@ -27,7 +27,7 @@ Every content save calls `revalidatePath('/')` (`src/hooks/revalidateHome.ts`) s
 
 ```bash
 cp .env.example .env      # fill DATABASE_URL (Postgres), PAYLOAD_SECRET, NEXT_PUBLIC_SERVER_URL
-npm install --legacy-peer-deps
+npm ci
 npm run dev               # http://localhost:3000, admin at /admin
 ```
 

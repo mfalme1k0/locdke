@@ -28,7 +28,33 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const { homepage: h, artist, settings, services, portfolio } = await getHomeData()
   const hero = img(h.hero?.image, 'large')
-  const portrait = img(artist.portrait, 'card')
+  const portrait = img(artist.portrait ?? h.hero?.image, 'card')
+  const servicesImage = img(portfolio[0]?.coverImage ?? h.hero?.image, 'large')
+  const bookingMedia =
+    portfolio.find((item) => item.images?.length)?.images?.[0] ??
+    portfolio.at(-1)?.coverImage ??
+    artist.portrait ??
+    h.hero?.image
+  const bookingImage = img(bookingMedia, 'large')
+  const seenPortfolioMedia = new Set<number>()
+  const portfolioPhotos = portfolio.flatMap((item) => {
+    const photos = [
+      { media: item.coverImage, title: item.name, description: item.description },
+      ...(item.images ?? []).map((media) => ({
+        media,
+        title: '',
+        description: typeof media === 'number' ? '' : (media.caption ?? ''),
+      })),
+    ]
+
+    return photos.flatMap(({ media, title, description }) => {
+      const mediaID = typeof media === 'number' ? media : media.id
+      if (seenPortfolioMedia.has(mediaID)) return []
+      seenPortfolioMedia.add(mediaID)
+      const photo = img(media, 'card')
+      return photo ? [{ ...photo, id: `${item.id}-${mediaID}`, title, description }] : []
+    })
+  })
 
   return (
     <div className={`locd ${display.variable} ${body.variable}`}>
@@ -81,23 +107,43 @@ export default async function HomePage() {
 
         <section id="services" className="services pad">
           <div className="wrap">
-            <Reveal>
-              <div className="head">
-                <p className="eyebrow">{h.services?.eyebrow}</p>
-                <h2>{h.services?.heading}</h2>
-                <p>{h.services?.intro}</p>
-              </div>
-            </Reveal>
-            <div className="grid">
-              {services.map((s, index) => (
-                <Reveal key={s.id} delay={Math.min(index, 3) * 70}>
-                  <article className="service">
-                    <h3>{s.title}</h3>
-                    <p>{s.description}</p>
-                    <span className="price">{s.priceDisplay}</span>
-                  </article>
+            <div className="services-layout">
+              {servicesImage && (
+                <Reveal className="services-visual" variant="image">
+                  <figure className="section-photo">
+                    <Image
+                      src={servicesImage.src}
+                      alt={servicesImage.alt}
+                      width={900}
+                      height={1125}
+                      sizes="(max-width: 800px) 100vw, 38vw"
+                    />
+                    <figcaption>
+                      <span>01</span> Signature loc artistry
+                    </figcaption>
+                  </figure>
                 </Reveal>
-              ))}
+              )}
+              <div className="services-content">
+                <Reveal>
+                  <div className="head">
+                    <p className="eyebrow">{h.services?.eyebrow}</p>
+                    <h2>{h.services?.heading}</h2>
+                    <p>{h.services?.intro}</p>
+                  </div>
+                </Reveal>
+                <div className="grid">
+                  {services.map((s, index) => (
+                    <Reveal key={s.id} delay={Math.min(index, 3) * 70}>
+                      <article className="service">
+                        <h3>{s.title}</h3>
+                        <p>{s.description}</p>
+                        <span className="price">{s.priceDisplay}</span>
+                      </article>
+                    </Reveal>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -105,7 +151,7 @@ export default async function HomePage() {
         <section id="about" className="about pad">
           <div className="wrap">
             {portrait && (
-              <Reveal className="about-visual">
+              <Reveal className="about-visual" variant="image">
                 <div className="img">
                   <Image
                     src={portrait.src}
@@ -154,24 +200,31 @@ export default async function HomePage() {
                 <p>{h.portfolio?.intro}</p>
               </div>
             </Reveal>
-            <div className="gallery">
-              {portfolio.map((item, index) => {
-                const cover = img(item.coverImage, 'card')
-                if (!cover) return null
+            <div
+              className={`gallery ${portfolioPhotos.length < 3 ? 'gallery-compact' : 'gallery-editorial'}`}
+            >
+              {portfolioPhotos.map((photo, index) => {
                 return (
-                  <Reveal key={item.id} delay={Math.min(index % 3, 2) * 90}>
+                  <Reveal
+                    key={photo.id}
+                    className={index === 0 ? 'gallery-featured' : ''}
+                    variant="image"
+                    delay={Math.min(index % 3, 2) * 90}
+                  >
                     <figure className="card" style={{ margin: 0 }}>
                       <Image
-                        src={cover.src}
-                        alt={cover.alt || item.name}
+                        src={photo.src}
+                        alt={photo.alt || photo.title}
                         width={800}
                         height={1000}
-                        sizes="(max-width: 800px) 100vw, 25vw"
+                        sizes="(max-width: 800px) 100vw, 60vw"
                       />
-                      <figcaption>
-                        <h4>{item.name}</h4>
-                        {item.description && <p>{item.description}</p>}
-                      </figcaption>
+                      {(photo.title || photo.description) && (
+                        <figcaption>
+                          {photo.title && <h4>{photo.title}</h4>}
+                          {photo.description && <p>{photo.description}</p>}
+                        </figcaption>
+                      )}
                     </figure>
                   </Reveal>
                 )
@@ -181,32 +234,50 @@ export default async function HomePage() {
         </section>
 
         <section id="booking" className="booking pad">
-          <div className="wrap">
-            <Reveal>
-              <div className="head">
-                <p className="eyebrow">{h.booking?.eyebrow}</p>
-                <h2>{h.booking?.heading}</h2>
-                <p>{h.booking?.intro}</p>
-                <div className="contact">
-                  {settings.whatsapp && (
-                    <a className="btn" href={`https://wa.me/${settings.whatsapp}`}>
-                      WhatsApp
-                    </a>
-                  )}
-                  {settings.socials?.map((s) => (
-                    <a key={s.id} className="btn" href={s.url} rel="noopener">
-                      {s.platform}
-                    </a>
-                  ))}
+          <div className="wrap booking-layout">
+            {bookingImage && (
+              <Reveal className="booking-visual" variant="image">
+                <figure className="section-photo">
+                  <Image
+                    src={bookingImage.src}
+                    alt={bookingImage.alt}
+                    width={900}
+                    height={1125}
+                    sizes="(max-width: 800px) 100vw, 38vw"
+                  />
+                  <figcaption>
+                    <span>02</span> Made for your next chapter
+                  </figcaption>
+                </figure>
+              </Reveal>
+            )}
+            <div className="booking-content">
+              <Reveal>
+                <div className="head">
+                  <p className="eyebrow">{h.booking?.eyebrow}</p>
+                  <h2>{h.booking?.heading}</h2>
+                  <p>{h.booking?.intro}</p>
+                  <div className="contact">
+                    {settings.whatsapp && (
+                      <a className="btn" href={`https://wa.me/${settings.whatsapp}`}>
+                        WhatsApp
+                      </a>
+                    )}
+                    {settings.socials?.map((s) => (
+                      <a key={s.id} className="btn" href={s.url} rel="noopener">
+                        {s.platform}
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </Reveal>
-            <Reveal delay={120}>
-              <BookingForm
-                services={services.map((s) => ({ id: s.id, title: s.title }))}
-                successMessage={h.booking?.successMessage ?? 'Thank you!'}
-              />
-            </Reveal>
+              </Reveal>
+              <Reveal delay={120}>
+                <BookingForm
+                  services={services.map((s) => ({ id: s.id, title: s.title }))}
+                  successMessage={h.booking?.successMessage ?? 'Thank you!'}
+                />
+              </Reveal>
+            </div>
           </div>
         </section>
       </main>

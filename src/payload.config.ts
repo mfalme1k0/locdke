@@ -5,11 +5,8 @@ import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Bookings } from './collections/Bookings'
-import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
-import { Pages } from './collections/Pages'
 import { PortfolioCategories } from './collections/PortfolioCategories'
-import { Posts } from './collections/Posts'
 import { Services } from './collections/Services'
 import { Users } from './collections/Users'
 import { ArtistProfile } from './globals/ArtistProfile'
@@ -65,20 +62,19 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
-  collections: [
-    // What the stylist manages day to day
-    Bookings,
-    PortfolioCategories,
-    Services,
-    Media,
-    // Superadmin / structural
-    Users,
-    Pages,
-    Posts,
-    Categories,
-  ],
-  cors: [getServerSideURL()].filter(Boolean),
-  globals: [Homepage, ArtistProfile, SiteSettings, Header, Footer],
+collections: [
+  Bookings,
+  PortfolioCategories,
+  Services,
+  Media,
+  Users,
+],
+
+globals: [
+  Homepage,
+  ArtistProfile,
+  SiteSettings,
+],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,

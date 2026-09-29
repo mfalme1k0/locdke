@@ -2,7 +2,11 @@
 import { useEffect, useRef, useState } from 'react'
 
 /** Same behaviour as the original: fade in once, when ~16% is in view. */
-export function Reveal({ children, delay = 0, className = '' }: {
+export function Reveal({
+  children,
+  delay = 0,
+  className = '',
+}: {
   children: React.ReactNode
   delay?: number
   className?: string
@@ -12,7 +16,14 @@ export function Reveal({ children, delay = 0, className = '' }: {
 
   useEffect(() => {
     const el = ref.current
-    if (!el) return
+    if (
+      !el ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      !('IntersectionObserver' in window)
+    )
+      return
+    document.documentElement.dataset.revealReady = 'true'
+
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -27,7 +38,11 @@ export function Reveal({ children, delay = 0, className = '' }: {
   }, [])
 
   return (
-    <div ref={ref} className={`reveal ${visible ? 'visible' : ''} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+    <div
+      ref={ref}
+      className={`reveal ${visible ? 'visible' : ''} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
       {children}
     </div>
   )

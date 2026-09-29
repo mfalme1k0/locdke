@@ -26,7 +26,7 @@ export default async function HomePage() {
 
   return (
     <div className={`locd ${display.variable} ${body.variable}`}>
-      <SiteNav brand={settings.brandName} />
+      <SiteNav brand={settings.brandName||"Loc'd ke"} />
 
       <main>
         <section id="home" className="hero pad">
@@ -85,7 +85,7 @@ export default async function HomePage() {
               <p className="eyebrow">{artist.eyebrow}</p>
               <h2>{artist.heading}</h2>
               <div className="bio">
-                {artist.bio.split(/\n\s*\n/).map((para, i) => <p key={i}>{para}</p>)}
+               {(artist.bio ?? '').split(/\n\s*\n/).filter(Boolean).map((para, i) => <p key={i}>{para}</p>)}
               </div>
               {!!artist.highlights?.length && (
                 <div className="highlights">
@@ -148,7 +148,7 @@ export default async function HomePage() {
       <footer>
         <div className="wrap">
           <div>
-            <a className="brand" href="#home">{settings.brandName}</a>
+            <a className="brand" href="#home">{settings.brandName ||"Loc'd ke"}</a>
             <p style={{ marginTop: '.5rem' }}>{settings.footerTagline}</p>
             <p><a href={`mailto:${settings.email}`}>{settings.email}</a></p>
           </div>

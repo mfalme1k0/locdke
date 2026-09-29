@@ -1,3 +1,4 @@
+import { hideFromAdmins } from '@/access/roles'
 import type { CollectionConfig } from 'payload'
 
 import {
@@ -48,6 +49,7 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   },
   admin: {
+    hidden: hideFromAdmins,
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) =>

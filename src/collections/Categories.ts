@@ -1,3 +1,4 @@
+import { hideFromAdmins } from '@/access/roles'
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
@@ -13,6 +14,7 @@ export const Categories: CollectionConfig = {
     update: authenticated,
   },
   admin: {
+    hidden: hideFromAdmins,
     useAsTitle: 'title',
   },
   fields: [

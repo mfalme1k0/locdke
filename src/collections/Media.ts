@@ -1,16 +1,19 @@
 import type { CollectionConfig } from 'payload'
 
+import { isAdminOrSuperadmin, isSuperadmin } from '../access/roles'
+import { revalidateHomeAfterChange } from '../hooks/revalidateHome'
+
 export const Media: CollectionConfig = {
   slug: 'media',
 
   access: {
     read: () => true,
 
-    create: ({ req }) => Boolean(req.user),
+    create: isAdminOrSuperadmin,
 
-    update: ({ req }) => Boolean(req.user),
+    update: isAdminOrSuperadmin,
 
-    delete: ({ req }) => req.user?.role === 'superadmin',
+    delete: isSuperadmin,
   },
 
   upload: {
@@ -34,6 +37,12 @@ export const Media: CollectionConfig = {
         position: 'centre',
       },
       {
+        name: 'og',
+        width: 1200,
+        height: 630,
+        position: 'centre',
+      },
+      {
         name: 'large',
         width: 1600,
         height: 1600,
@@ -44,11 +53,14 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
   },
 
+  hooks: { afterChange: [revalidateHomeAfterChange] },
+
   fields: [
     {
       name: 'altText',
       type: 'text',
       required: true,
+      admin: { description: 'Short description of the photo (helps accessibility and Google).' },
     },
 
     {

@@ -4,11 +4,20 @@ import {
   isAdminOrSuperadmin,
   isSuperadmin,
 } from '../access/roles'
+import { revalidateHomeAfterChange, revalidateHomeAfterDelete } from '../hooks/revalidateHome'
 
 export const PortfolioCategories: CollectionConfig = {
   slug: 'portfolio-categories',
 
+  labels: { singular: 'Portfolio item', plural: 'Portfolio' },
+
+  hooks: {
+    afterChange: [revalidateHomeAfterChange],
+    afterDelete: [revalidateHomeAfterDelete],
+  },
+
   admin: {
+    description: 'Each item is a card in "Recent transformations" (cover photo, title, short caption).',
     useAsTitle: 'name',
 
     defaultColumns: [
@@ -43,13 +52,25 @@ export const PortfolioCategories: CollectionConfig = {
     {
       name: 'slug',
       type: 'text',
-      required: true,
       unique: true,
       index: true,
+      admin: { position: 'sidebar', description: 'Generated automatically from the name.' },
+      hooks: {
+        beforeValidate: [
+          ({ value, siblingData }) =>
+            value ||
+            String(siblingData?.name ?? '')
+              .toLowerCase()
+              .trim()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, ''),
+        ],
+      },
     },
 
     {
       name: 'description',
+      label: 'Short caption',
       type: 'textarea',
     },
 
@@ -65,7 +86,7 @@ export const PortfolioCategories: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
       hasMany: true,
-      required: true,
+      admin: { description: 'Optional extra photos for a gallery view.' },
     },
 
     {

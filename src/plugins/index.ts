@@ -4,6 +4,8 @@ import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { Plugin } from 'payload'
+import { s3Storage } from '@payloadcms/storage-s3'
+import { hideFromAdmins } from '@/access/roles'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -14,7 +16,7 @@ import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
+  return doc?.title ? `${doc.title} | LOC'D .ke` : "LOC'D .ke"
 }
 
 const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
@@ -27,6 +29,7 @@ export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages', 'posts'],
     overrides: {
+      admin: { hidden: hideFromAdmins },
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
@@ -59,6 +62,7 @@ export const plugins: Plugin[] = [
       payment: false,
     },
     formOverrides: {
+      admin: { hidden: hideFromAdmins },
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
           if ('name' in field && field.name === 'confirmationMessage') {
@@ -84,9 +88,30 @@ export const plugins: Plugin[] = [
     collections: ['posts'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
+      admin: { hidden: hideFromAdmins },
       fields: ({ defaultFields }) => {
         return [...defaultFields, ...searchFields]
       },
     },
   }),
+  // Cloud storage for uploads. Netlify/Vercel filesystems are ephemeral, so without
+  // this, photos the stylist uploads would vanish on the next deploy.
+  // Works with Cloudflare R2, AWS S3, Supabase Storage, Backblaze B2 (any S3-compatible bucket).
+  ...(process.env.S3_BUCKET
+    ? [
+        s3Storage({
+          collections: { media: true },
+          bucket: process.env.S3_BUCKET,
+          config: {
+            endpoint: process.env.S3_ENDPOINT,
+            region: process.env.S3_REGION || 'auto',
+            credentials: {
+              accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+              secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+            },
+            forcePathStyle: true,
+          },
+        }),
+      ]
+    : []),
 ]

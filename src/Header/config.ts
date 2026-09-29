@@ -1,3 +1,4 @@
+import { hideFromAdmins } from '@/access/roles'
 import type { GlobalConfig } from 'payload'
 
 import { link } from '@/fields/link'
@@ -5,6 +6,7 @@ import { revalidateHeader } from './hooks/revalidateHeader'
 
 export const Header: GlobalConfig = {
   slug: 'header',
+  admin: { hidden: hideFromAdmins },
   access: {
     read: () => true,
   },

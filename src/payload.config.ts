@@ -4,11 +4,17 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { Bookings } from './collections/Bookings'
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
+import { PortfolioCategories } from './collections/PortfolioCategories'
 import { Posts } from './collections/Posts'
+import { Services } from './collections/Services'
 import { Users } from './collections/Users'
+import { ArtistProfile } from './globals/ArtistProfile'
+import { Homepage } from './globals/Homepage'
+import { SiteSettings } from './globals/SiteSettings'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -24,9 +30,6 @@ export default buildConfig({
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below.
       beforeLogin: ['@/components/BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below.
-      beforeDashboard: ['@/components/BeforeDashboard'],
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -62,9 +65,20 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [
+    // What the stylist manages day to day
+    Bookings,
+    PortfolioCategories,
+    Services,
+    Media,
+    // Superadmin / structural
+    Users,
+    Pages,
+    Posts,
+    Categories,
+  ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer],
+  globals: [Homepage, ArtistProfile, SiteSettings, Header, Footer],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,
